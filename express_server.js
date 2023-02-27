@@ -70,7 +70,9 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (res, req) => {
-  
+  const username = req.body.username;
+  res.cookie("username", username); //don't continue with optional args
+  res.redirect("/urls");
 });
 
 //APP.LISTEN
