@@ -1,11 +1,15 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const cookieParser = require("cookie-parser");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
+
+
 app.set("view engine", "ejs");
 
+//Helper Function
 //generate six random alphanumeric chars (62 total) for unique short URL id
 function generateRandomString() {
   let alphaNumString = "";
@@ -13,12 +17,23 @@ function generateRandomString() {
   return alphaNumString;
 }
 
+app.use(cookieParser());
+
+
+// ROUTES
+
+//Database
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-//APP.GET
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+//Testers
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -28,18 +43,20 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+//URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
+//Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
+
+//Generates short URL & Saves to Database
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
@@ -48,32 +65,52 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
+//New Page/ URL Show
+
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
-app.get('/u/:id', (req, res) => {
+//Redirects to long URL
+
+app.get("/u/:id", (req, res) => {
   let longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
+
+//Delete Saved URLs from Server
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
+//Edit Saved URLs
+
+app.post("/urls/:id/edit", (req, res) => {
+  let edit = req.params.id;
+  urlDatabase[edit] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+
+//LOGIN
+// app.post("/login", (req, res) => {
+//  res.cookie("username", req.body.username);
+//  res.redirect("/urls");
+// });
+
 app.post("/urls/:id", (req, res) => {
-  const id = req.params.id
+  const id = req.params.id;
   urlDatabase[id] = req.body.newUrl;
   res.redirect("/urls");
 });
 
-app.post("/login", (res, req) => {
-  const username = req.body.username;
-  res.cookie("username", username); //don't continue with optional args
-  res.redirect("/urls");
-});
+
+
+
+
 
 //APP.LISTEN
 
