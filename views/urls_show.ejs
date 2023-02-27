@@ -23,10 +23,11 @@
       </div>
       <div class="card-footer text-muted">
         <h3>Edit</h3>
-        <form method=""POST" action="/urls"></form>
-          <label for="updateUrl">Update URL:</label>
-          <input type="text" name="newURL">
-          <button type="submit" class="btn btn-primary" >Submit</button>
+        <form method="POST" action="/urls/<%= id %>">
+          <label for="newUrl">Update URL:</label>
+          <input type="text" name="newUrl">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
       </div>
     </div>
     <!-- Bootstrap JS -->
