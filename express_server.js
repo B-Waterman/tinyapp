@@ -95,11 +95,6 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 
-//LOGIN
-// app.post("/login", (req, res) => {
-//  res.cookie("username", req.body.username);
-//  res.redirect("/urls");
-// });
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
@@ -107,10 +102,11 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-
-
-
-
+//LOGIN
+app.post("/login", (req, res) => {
+ res.cookie("username", req.body.username);
+ res.redirect("/urls");
+});
 
 //APP.LISTEN
 

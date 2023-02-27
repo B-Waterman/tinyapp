@@ -13,16 +13,16 @@
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-    <div class="navbar-nav">
+    <div class="navbar-nav mr-auto mt-2 mt-lg-0">
       <a class="nav-item nav-link" href="/urls">My URLs</a>
       <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
     </div>
     <!-- LOGIN FORM -->
     <form method="POST" action="/login" class="form-inline">
       <div class="input-group mr-sm-2">
-        <input type="text" class="form-control" name="Username" placeholder="Username" aria-label="Username" aria-describedby="basic-addon2">
+        <input name="username" placeholder="Username" aria-label="Username" type="text" class="form-control" aria-describedby="basic-addon2">
         <div class="input-group-append">
-          <button class="btn btn-info" type="button">Login</button>
+          <button value="Submit" class="btn btn-info" type="button">Login</button>
         </div>
       </div>
     </form>
