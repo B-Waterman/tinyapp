@@ -57,6 +57,11 @@ app.get('/u/:id', (req, res) => {
   res.redirect(longURL);
 });
 
+app.post("/urls/:id/delete", (re, res) => {
+  delete urlDatabase[req.params.id];
+  express.redirect("/urls/");
+});
+
 //APP.LISTEN
 
 app.listen(PORT, () => {
