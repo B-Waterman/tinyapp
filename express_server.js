@@ -53,7 +53,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get('/u/:id', (req, res) => {
+app.get("/u/:id", (req, res) => {
   let longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
