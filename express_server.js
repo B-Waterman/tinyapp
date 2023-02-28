@@ -54,7 +54,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = { username: req.cookies["username"], urls: urlDatabase };
-  res.render("urls_new");
+  res.render("urls_new", templateVars);
 });
 
 //Generates short URL & Saves to Database
@@ -76,8 +76,9 @@ app.get("/urls/:id", (req, res) => {
 //Redirects to long URL
 
 app.get("/u/:id", (req, res) => {
+  let templateVars = req.cookies["username"]
   let longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  res.redirect(longURL, templateVars);
 });
 
 //Delete Saved URLs from Server
@@ -87,15 +88,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-//Edit Saved URLs
-
-app.post("/urls/:id/edit", (req, res) => {
-  let edit = req.params.id;
-  urlDatabase[edit] = req.body.longURL;
-  res.redirect("/urls");
-});
-
-
+//Redirect client to /urls once Tiny URL is edited
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
@@ -109,8 +102,11 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-//LOGOUT
-// app.post("")
+// LOGOUT
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+});
 
 //APP.LISTEN
 

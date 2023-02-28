@@ -18,13 +18,24 @@
       <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
     </div>
     <!-- LOGIN FORM -->
-    <form method="POST" action="/login" class="form-inline">
-      <div class="input-group mr-sm-2">
-        <input name="username" placeholder="Username" aria-label="Username" type="text" class="form-control" aria-describedby="basic-addon2">
-        <div class="input-group-append">
-          <button value="Submit" class="btn btn-info" type="submit">Login</button>
+    <div>
+    <% if(!username){ %>
+      <form method="POST" action="/login" class="form-inline">
+        <div class="input-group mr-sm-2">
+          <input name="username" placeholder="Username" aria-label="Username" type="text" class="form-control" aria-describedby="basic-addon2">
+          <div class="input-group-append">
+            <button value="Submit" class="btn btn-info btn-outline-light" type="submit">LOGIN</button>
+          </div>
         </div>
+      </form>
+    <% } else { %>
+      <div class="d-flex justify-content-start" <h1>Welcome Back <%= username %></h1>
       </div>
-    </form>
+      <div>
+        <form method="POST" action="/logout" class="form-inline">
+        <div class="input-group-append mr-sm-2">
+          <button value="Submit" class="btn btn-info btn-outline-light" type="submit">LOGOUT</button>
+      </div>
+    <% } %>
   </nav>
 </header>
