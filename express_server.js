@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 //Database
 
-const urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -46,13 +46,14 @@ app.get("/hello", (req, res) => {
 //URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 
 app.get("/urls/new", (req, res) => {
+  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_new");
 });
 
@@ -68,7 +69,7 @@ app.post("/urls", (req, res) => {
 //New Page/ URL Show
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  let templateVars = { username: req.cookies["username"], id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
@@ -104,9 +105,12 @@ app.post("/urls/:id", (req, res) => {
 
 //LOGIN
 app.post("/login", (req, res) => {
- res.cookie("username", req.body.username);
- res.redirect("/urls");
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
 });
+
+//LOGOUT
+// app.post("")
 
 //APP.LISTEN
 
