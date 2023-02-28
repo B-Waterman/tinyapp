@@ -20,10 +20,11 @@
     <%- include('partials/_header') %>
     <main style="margin: 1em;" class="mx-auto">
       <h3 class="text-center mb-5">Register By Email</h3>
-      <form action="/register" method="POST">
-      <div class="form-group p-6">
-        <label for="email">Email Address</label>
-        <input class="form-control" name="email" type="email"
+      <form class="form-group p-5" action="/register" method="POST">
+        <label for="email">Enter Your Email Address</label>
+        <input class="form-control" name="email" type="email">
+        <label for="password">Enter Your Password</label>
+        <input class="form-control" name="password" type="password">
         </div>
       </form>
     </main>
