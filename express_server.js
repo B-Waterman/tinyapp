@@ -51,14 +51,15 @@ app.get("/urls.json", (req, res) => {
 
 // ROUTES
 
-//Testers
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+//Tester
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello World</b></body></html>\n");
+});
+
+//Redirects to main page
+app.get("/", (req, res) => {
+  res.redirect("/urls");
 });
 
 //Shows registration page
@@ -118,7 +119,6 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 
-//***THIS ONE MIGHT BE WHY LOGIN WASN'T STICKING BETWEEN 2 PAGES, COME BACK***/
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.newUrl;
