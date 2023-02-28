@@ -64,24 +64,24 @@ app.get("/hello", (req, res) => {
 //Shows registration page
 
 app.get("/register", (req, res) => {
-  let userObject = users[req.cookies.userID];
-  let templateVars = { userObject };
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject };
   res.render("user_registration", templateVars);
 });
 
 //URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
-  let userObject = users[req.cookies.userID];
-  let templateVars = { userObject, urls: urlDatabase };
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject, urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 
 app.get("/urls/new", (req, res) => {
-  let userObject = users[req.cookies.userID];
-  let templateVars = { userObject, urls: urlDatabase };
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject, urls: urlDatabase };
   res.render("urls_new", templateVars);
 });
 
@@ -96,15 +96,15 @@ app.post("/urls", (req, res) => {
 //New Page/ URL Show
 
 app.get("/urls/:id", (req, res) => {
-  let userObject = users[req.cookies.userID];
-  let templateVars = { userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 
 app.get("/u/:id", (req, res) => {
-  let userObject = users[req.cookies.userID];
+  let userObject = users[req.cookies.user_id];
   let longURL = urlDatabase[req.params.id];
   res.redirect(longURL, userObject);
 });
@@ -127,25 +127,25 @@ app.post("/urls/:id", (req, res) => {
 
 //Register new user to Users database
 app.post("/register", (req, res) => {
-  const userID = generateRandomString();
+  let userID = generateRandomString();
   users[userID] = {
     id: userID,
     email: req.body.email,
     password: req.body.password
   };
-  res.cookie("userID", userID);
+  res.cookie("user_id", userID);
   res.redirect("/urls");
 });
 
 //Login: creates user cookie and redirects to /urls as named user-session
 app.post("/login", (req, res) => {
-  res.cookie("user", req.body.users);
+  res.cookie("user_id", req.body.users);
   res.redirect("/urls");
 });
 
 //Logout: removes user cookie and redirects to /urls as no-user session
 app.post("/logout", (req, res) => {
-  res.clearCookie("userID");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
