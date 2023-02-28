@@ -85,7 +85,6 @@ app.get("/urls/new", (req, res) => {
 //Generates short URL & Saves to Database
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL; //saves key-value pair to urlDatabase then redirects
   res.redirect(`/urls/${id}`);
@@ -129,6 +128,8 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
+  res.cookie("userID", userID);
+  res.redirect("/urls");
 });
 
 //Login: creates username cookie and redirects to /urls as named user-session
