@@ -73,7 +73,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//Redirects to long URL
+//Redirects to corresponding long URL from database
 
 app.get("/u/:id", (req, res) => {
   let templateVars = req.cookies["username"]
@@ -88,7 +88,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-//Redirect client to /urls once Tiny URL is edited
+//Redirects client to /urls once Tiny URL is edited and saved to database
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
@@ -96,13 +96,13 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-//LOGIN
+//Login: creates username cookie and redirects to /urls as named user-session
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
 
-// LOGOUT
+//Logout: removes username cookie and redirects to /urls as no-user session
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
