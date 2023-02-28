@@ -43,6 +43,12 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+//Register:
+//need "email" or username?, tempvars, req.cookie
+app.get("/register", (req, res) => {
+  let templateVars = 
+});
+
 //URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
