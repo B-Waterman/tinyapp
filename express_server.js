@@ -1,28 +1,44 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+
 const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 app.set("view engine", "ejs");
 
+
 //Helper Function
-//generate six random alphanumeric chars (62 total) for unique short URL id
+
+//Generate Random ID for Tiny URLs & Users
 function generateRandomString() {
   let alphaNumString = "";
   alphaNumString += Math.random().toString(36).substring(1, 8);
   return alphaNumString;
 }
 
-app.use(cookieParser());
 
+//DATABASES
 
-// ROUTES
+//SUGGESTED TEMPLATE User(s) Registration
 
-//Database
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "Blah-the-Blah",
+  }
+};
+
+//URL Database
 
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -33,6 +49,8 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+// ROUTES
+
 //Testers
 
 app.get("/", (req, res) => {
@@ -40,10 +58,11 @@ app.get("/", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  res.send("<html><body>Hello World</b></body></html>\n");
 });
 
-//Register:
+//Shows registration page
+
 app.get("/register", (req, res) => {
   let templateVars = { username: req.cookies["username"] };
   res.render("user_registration", templateVars);
@@ -100,6 +119,16 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.newUrl;
   res.redirect("/urls");
+});
+
+//Register new user to Users database
+app.post("/register", (req, res) => {
+  const userID = generateRandomString();
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  };
 });
 
 //Login: creates username cookie and redirects to /urls as named user-session
