@@ -19,10 +19,10 @@
     </div>
     <!-- LOGIN FORM -->
     <div>
-    <% if(username) { %>
+    <% if(email) { %>
       <form method="POST" action="/logout" class="form-inline">
         <div class="input-group-append mr-sm-2">
-          <label>Logged In As: <%= username %></label>
+          <label>Logged In As: <%= email %></label>
           <button class="btn btn-info btn-outline-light" type="submit" style="margin: 1em">LOGOUT</button>
         </div>
       </form>

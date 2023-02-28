@@ -64,21 +64,24 @@ app.get("/hello", (req, res) => {
 //Shows registration page
 
 app.get("/register", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let userObject = users[req.cookies.userID];
+  let templateVars = { userObject };
   res.render("user_registration", templateVars);
 });
 
 //URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
-  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  let userObject = users[req.cookies.userID];
+  let templateVars = { userObject, urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"], urls: urlDatabase };
+  let userObject = users[req.cookies.userID];
+  let templateVars = { userObject, urls: urlDatabase };
   res.render("urls_new", templateVars);
 });
 
@@ -93,16 +96,17 @@ app.post("/urls", (req, res) => {
 //New Page/ URL Show
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { username: req.cookies["username"], id: req.params.id, longURL: urlDatabase[req.params.id] };
+  let userObject = users[req.cookies.userID];
+  let templateVars = { userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 
 app.get("/u/:id", (req, res) => {
-  let templateVars = req.cookies["username"]
+  let userObject = users[req.cookies.userID];
   let longURL = urlDatabase[req.params.id];
-  res.redirect(longURL, templateVars);
+  res.redirect(longURL, userObject);
 });
 
 //Delete Saved URLs from Server
@@ -114,6 +118,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 
+//***THIS ONE MIGHT BE WHY LOGIN WASN'T STICKING BETWEEN 2 PAGES, COME BACK***/
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   urlDatabase[id] = req.body.newUrl;
@@ -132,15 +137,15 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-//Login: creates username cookie and redirects to /urls as named user-session
+//Login: creates user cookie and redirects to /urls as named user-session
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie("user", req.body.users);
   res.redirect("/urls");
 });
 
-//Logout: removes username cookie and redirects to /urls as no-user session
+//Logout: removes user cookie and redirects to /urls as no-user session
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("userID");
   res.redirect("/urls");
 });
 
