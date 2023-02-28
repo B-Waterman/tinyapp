@@ -151,6 +151,8 @@ app.post("/logout", (req, res) => {
 
 //APP.LISTEN
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+app.listen(PORT, error => {
+  error ? 
+  console.log("Server Error, Cannot Start TinyApp"): Error
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
