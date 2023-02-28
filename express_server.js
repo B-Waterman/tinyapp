@@ -46,7 +46,8 @@ app.get("/hello", (req, res) => {
 //Register:
 //need "email" or username?, tempvars, req.cookie
 app.get("/register", (req, res) => {
-  let templateVars = 
+  let templateVars = { username: req.cookies["username"] };
+  res.render("user_registration", templateVars);
 });
 
 //URLs - Saved to Session, Main Page
