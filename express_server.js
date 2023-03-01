@@ -87,7 +87,10 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let templateVars = { user: userObject };
-  res.render("user_registration", templateVars);
+  if (userObject === undefined) {
+    res.render("user_registration", templateVars);
+  }
+  res.redirect("/urls");
 });
 
 //URLs - Saved to Session, Main Page
