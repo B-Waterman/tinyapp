@@ -17,24 +17,27 @@
       <a class="nav-item nav-link" href="/urls">My URLs</a>
       <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
     </div>
-    <!-- LOGIN FORM -->
-    <div>
-    <% if(user) { %>
-      <form method="POST" action="/logout" class="form-inline">
-        <div class="input-group-append mr-sm-2">
-          <label>Logged In As: <%= user.email %></label>
-          <button class="btn btn-info btn-outline-light" type="submit" style="margin: 1em">LOGOUT</button>
-        </div>
-      </form>
-    <% } else { %>
-      <form method="POST" action="/login" class="form-inline">
-        <div class="input-group mr-sm-2">
-          <input name="user.email" placeholder="Username" aria-label="Username" type="text" class="form-control" aria-describedby="basic-addon2">
-          <div class="input-group-append">
-            <button value="Submit" class="btn btn-info" type="submit">LOGIN</button>
+      <!-- REGISTER+LOGIN/LOGOUT -->
+      <div>
+        <% if(user) { %>
+          <form method="POST" action="/logout" class="form-inline">
+            <div class="input-group-append mr-sm-2">
+              <label>Logged In As: <%= user.email %></label>
+              <button class="btn btn-info btn-outline-light" type="submit" style="margin: 1em">LOGOUT</button>
+            </div>
+          </form>
+        <% } else { %>
+          <div class="btn-group" role="group" aria-label="register, login/logout">
+            <a href="/register">
+            <button value="Submit" class="btn btn-info btn-outline-light" type="submit">REGISTER</button></a>
+              <div class="input-group-append">
+              </div>
+            <a href="/login">
+            <button value="Submit" class="btn btn-info btn-outline-light" type="submit">LOGIN</button></a>
+              <div class="input-group-append">
+              </div>
           </div>
-        </div>
-      </form>
-    <% } %>
+        <% } %>
+      </div>
   </nav>
 </header>
