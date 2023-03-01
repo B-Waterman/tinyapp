@@ -171,6 +171,17 @@ app.post("/register", (req, res) => {
 
 //Login: creates user cookie and redirects to /urls as named user-session
 app.post("/login", (req, res) => {
+  let registeredUser = findUserEmail(req.body.email);
+  if (registeredUser === null) {
+    res.status(400);
+    res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.")
+    return;
+  };
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400);
+    res.send("Email or Password field empty. Please enter a valid email or password.");
+    return;
+  }
   res.cookie("user_id", req.body.users);
   res.redirect("/urls");
 });
