@@ -20,6 +20,11 @@ function generateRandomString() {
   return alphaNumString;
 }
 
+//Find registered user in users object via email
+//email as param, return entire object OR if no? return null
+const findUserEmail = (email) => {
+  
+};
 
 //DATABASES
 
@@ -126,6 +131,9 @@ app.post("/urls/:id", (req, res) => {
 });
 
 //Register new user to Users database
+
+//check if email & password are empty strings = error 400
+//check if email already reg'd, = 400
 app.post("/register", (req, res) => {
   let userID = generateRandomString();
   users[userID] = {
