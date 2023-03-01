@@ -23,9 +23,9 @@ function generateRandomString() {
 //Find registered user in users object via email
 //email as param, return entire object OR if no? return null
 const findUserEmail = (email) => {
-  for (let user of users) {
+  for (let user in users) {
     if (users[user].email === email) {
-      console.log(users);
+      return user;
     }
   }
   return null;
@@ -141,7 +141,12 @@ app.post("/urls/:id", (req, res) => {
 //check if email already reg'd, = 400
 app.post("/register", (req, res) => {
   let registeredUser = findUserEmail(req.body.email);
-  if (registeredUser !== null) return res.status(400);
+  if (registeredUser !== null) {
+    res.status(400);
+    res.send("User email already registered; please login, or register with another email address.")
+    return;
+  };
+
   
   let userID = generateRandomString();
   users[userID] = {
