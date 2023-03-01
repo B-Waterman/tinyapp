@@ -183,7 +183,7 @@ app.post("/login", (req, res) => {
     res.send("Incorrect password. Please re-try.");
     return;
   }
-  res.cookie("user_id", req.body.users);
+  res.cookie("user_id", registeredUser);
   res.redirect("/urls");
 
 });
