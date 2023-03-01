@@ -146,7 +146,11 @@ app.post("/register", (req, res) => {
     res.send("User email already registered; please login, or register with another email address.")
     return;
   };
-
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400);
+    res.send("Email or Password field empty. Please enter a valid email or password.");
+    return;
+  }
   
   let userID = generateRandomString();
   users[userID] = {
