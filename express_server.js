@@ -76,7 +76,10 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let templateVars = { user: userObject };
-  res.render("login", templateVars);
+  if (userObject === undefined) {
+    res.render("login", templateVars);
+  }
+  res.redirect("/urls");
 });
 
 //Shows registration page
