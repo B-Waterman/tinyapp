@@ -72,6 +72,13 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
+//Shows login page
+app.get("/login", (req, res) => {
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject };
+  res.render("login", templateVars);
+});
+
 //Shows registration page
 
 app.get("/register", (req, res) => {
