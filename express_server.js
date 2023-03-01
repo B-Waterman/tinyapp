@@ -150,9 +150,9 @@ app.post("/register", (req, res) => {
   let registeredUser = findUserEmail(req.body.email);
   if (registeredUser !== null) {
     res.status(400);
-    res.send("User email already registered; please login, or register with another email address.")
+    res.send("User email already registered; please login, or register with another email address.");
     return;
-  };
+  }
   if (req.body.email === "" || req.body.password === "") {
     res.status(400);
     res.send("Email or Password field empty. Please enter a valid email or password.");
@@ -171,21 +171,21 @@ app.post("/register", (req, res) => {
 
 //Login: creates user cookie and redirects to /urls as named user-session
 app.post("/login", (req, res) => {
-  let registeredUser = findUserEmail(req.body.email);
+  const registeredUser = findUserEmail(req.body.email);
   if (registeredUser === null) {
     res.status(403);
-    res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.")
+    res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
     return;
-  };
+  }
 
-  if (users[userID].password !== password) {
+  if (users[registeredUser].password !== req.body.password) {
     res.status(403);
-    res.send("Incorrect password. Please re-try.")
+    res.send("Incorrect password. Please re-try.");
     return;
-  };
-
+  }
   res.cookie("user_id", req.body.users);
   res.redirect("/urls");
+
 });
 
 //Logout: removes user cookie and redirects to /urls as no-user session
@@ -197,7 +197,5 @@ app.post("/logout", (req, res) => {
 //APP.LISTEN
 
 app.listen(PORT, error => {
-  error ? 
-  console.log("Server Error, Cannot Start TinyApp"): Error
-  console.log(`TinyApp listening on port ${PORT}!`);
+  (error ? console.log("Server Error, Cannot Start TinyApp") : console.log(`TinyApp listening on port ${PORT}!`));
 });
