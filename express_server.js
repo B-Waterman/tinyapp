@@ -188,7 +188,7 @@ app.post("/login", (req, res) => {
 
 });
 
-//Logout: removes user cookie and redirects to /urls as no-user session
+//Logout: removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
