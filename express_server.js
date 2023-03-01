@@ -184,11 +184,6 @@ app.post("/login", (req, res) => {
     return;
   };
 
-  if (req.body.email === "" || req.body.password === "") {
-    res.status(400);
-    res.send("Email or Password field empty. Please enter a valid email or password.");
-    return;
-  };
   res.cookie("user_id", req.body.users);
   res.redirect("/urls");
 });
