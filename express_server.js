@@ -183,14 +183,17 @@ app.get("/register", (req, res) => {
 //check if email & password are empty strings = error 400
 //check if email already reg'd, = 400
 app.post("/register", (req, res) => {
-  const registeredUser = findUserEmail(req.body.email);
-  if (registeredUser !== null) {
-    res.status(400);
-    return res.send("User email already registered; please login, or register with another email address.");
-  }
-  if (req.body.email === "" || req.body.password === "") {
+  const email = req.body.email;
+  const password = req.body.password;
+  const registeredUser = findUserEmail(email);
+
+  if (!email || !password) {
     res.status(400);
     return res.send("Email or Password field empty. Please enter a valid email or password.");
+  }
+  if (registeredUser) {
+    res.status(400);
+    return res.send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
   
   const userID = generateRandomString();
