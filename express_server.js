@@ -62,7 +62,6 @@ app.get("/urls.json", (req, res) => {
 // ROUTES
 
 //Tester
-
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello World</b></body></html>\n");
 });
@@ -72,26 +71,6 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-//Shows login page
-app.get("/login", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject };
-  if (!userObject) {
-    return res.render("login", templateVars);
-  }
-  res.redirect("/urls");
-});
-
-//Shows registration page
-
-app.get("/register", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject };
-  if (!userObject) {
-    return res.render("user_registration", templateVars);
-  }
-  res.redirect("/urls");
-});
 
 //URLs - Saved to Session, Main Page
 
@@ -105,18 +84,7 @@ app.get("/urls", (req, res) => {
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
-
-app.get("/urls/new", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject, urls: urlDatabase };
-  if (!userObject) {
-    return res.redirect("/login");
-  }
-  res.render("urls_new", templateVars);
-});
-
 //Generates short URL & Saves to Database
-
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   let userObject = users[req.cookies.user_id];
@@ -127,8 +95,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${id}`);
 });
 
-//New Page/ URL Show
+app.get("/urls/new", (req, res) => {
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject, urls: urlDatabase };
+  if (!userObject) {
+    return res.redirect("/login");
+  }
+  res.render("urls_new", templateVars);
+});
 
+//New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let templateVars = { user: userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
@@ -136,25 +112,65 @@ app.get("/urls/:id", (req, res) => {
 });
 
 //Redirects to corresponding long URL from database
-
 app.get("/u/:id", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let longURL = urlDatabase[req.params.id];
   res.redirect(longURL, userObject);
 });
 
-//Delete Saved URLs from Server
+//Redirects client to /urls once Tiny URL is edited and saved to database
+app.post("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  urlDatabase[id] = req.body.newUrl;
+  res.redirect("/urls");
+});
 
+//Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
-//Redirects client to /urls once Tiny URL is edited and saved to database
 
-app.post("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  urlDatabase[id] = req.body.newUrl;
+
+//LOGIN
+
+//GET: shows login page
+app.get("/login", (req, res) => {
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject };
+  if (!userObject) {
+    return res.render("login", templateVars);
+  }
+  res.redirect("/urls");
+});
+
+//POST: creates user cookie and redirects to /urls as named user-session
+app.post("/login", (req, res) => {
+  const registeredUser = findUserEmail(req.body.email);
+  if (registeredUser === null) {
+    res.status(403);
+    return res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
+  }
+
+  if (users[registeredUser].password !== req.body.password) {
+    res.status(403);
+    return res.send("Incorrect password. Please re-try.");
+  }
+  res.cookie("user_id", registeredUser);
+  res.redirect("/urls");
+  
+});
+
+//REGISTER
+
+//Shows registration page
+app.get("/register", (req, res) => {
+  let userObject = users[req.cookies.user_id];
+  let templateVars = { user: userObject };
+  if (!userObject) {
+    return res.render("user_registration", templateVars);
+  }
   res.redirect("/urls");
 });
 
@@ -183,25 +199,9 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-//Login: creates user cookie and redirects to /urls as named user-session
-app.post("/login", (req, res) => {
-  const registeredUser = findUserEmail(req.body.email);
-  if (registeredUser === null) {
-    res.status(403);
-    return res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
-  }
+//LOGOUT
 
-  if (users[registeredUser].password !== req.body.password) {
-    res.status(403);
-    res.send("Incorrect password. Please re-try.");
-    return;
-  }
-  res.cookie("user_id", registeredUser);
-  res.redirect("/urls");
-
-});
-
-//Logout: removes user cookie and redirects to /login page
+//: removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
