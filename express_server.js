@@ -68,7 +68,15 @@ function findUserEmail(email) {
 
 //Users can only see/manipulate/access URLs created under their id
 function urlsForUser(id) {
+  const userURLS = {};
 
+  const ids = Object.values(urlDatabase);
+  for (const id of ids) {
+    const urlObject = urlDatabase[id];
+    if (urlObject.userID === userID) {
+      urls[id] = urlObject;
+    }
+  }
 };
 
 // ROUTES
