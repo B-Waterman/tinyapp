@@ -104,7 +104,7 @@ app.get("/urls/:id", (req, res) => {
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
-  const userObject = req.cookies.user_id;
+  const id = req.params.id;
   const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
@@ -129,7 +129,9 @@ app.post("/urls/:id", (req, res) => {
 
 //Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  const id = req.params.id;
+  
+  delete urlDatabase[id];
   res.redirect("/urls");
 });
 
