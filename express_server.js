@@ -31,14 +31,8 @@ const users = {
 //URL Database
 
 const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID",
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "aJ48lW",
-  },
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
 };
 
 app.get("/urls.json", (req, res) => {
@@ -97,53 +91,37 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.cookies.user_id;
-  const urls = urlsForUser(userID);
-  const templateVars = { user: userID, urls };
-
   if (!userID) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
+  const urls = urlsForUser(userID);
+
+  const templateVars = { urls: urlDatabase, user: userID };
   res.render("urls_index", templateVars);
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies.user_id;
-  const urls = urlsForUser(userID);
-  const templateVars = { user: userID, urls };
-
   if (!userID) {
     return res.redirect("/login");
   }
+
+  const templateVars = { urls: urlDatabase, user: userID };
   res.render("urls_new", templateVars);
 });
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
   const userID = req.cookies.user_id;
-  const id = req.params.id;
-  
-  if (!userID) {
-    return res.redirect("/login");
-  }
-
-  const templateVars = { user: userID, id: req.params.id, longURL: urlDatabase[id].longURL };
+  const templateVars = { user: userID, id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
-  const userID = req.cookies.user_id;
-  const usersURLS = urlsForUser(userID);
-
-  if (!userID) {
-    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
-  }
-  if (!usersURLS) {
-
-  }
   const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
+  const longURL = urlDatabase[req.params.id];
   res.redirect(longURL);
 });
 
@@ -161,7 +139,7 @@ app.post("/urls", (req, res) => {
 //Redirects client to /urls once Tiny URL is edited and saved to database
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  urlDatabase[id] = req.body.newUrl;
+  urlDatabase[id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
@@ -179,10 +157,11 @@ app.post("/urls/:id/delete", (req, res) => {
 //GET: shows login page
 app.get("/login", (req, res) => {
   const userID = req.cookies.user_id;
-  const templateVars = { user: userID };
   if (!userID) {
     return res.render("login", templateVars);
   }
+
+  const templateVars = { user: userID };
   res.redirect("/urls");
 });
 
@@ -211,10 +190,11 @@ app.post("/login", (req, res) => {
 //Shows registration page
 app.get("/register", (req, res) => {
   const userID = req.cookies.user_id;
-  const templateVars = { user: userID };
   if (!userID) {
     return res.render("user_registration", templateVars);
   }
+  
+  const templateVars = { user: userID };
   res.redirect("/urls");
 });
 
