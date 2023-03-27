@@ -166,13 +166,11 @@ app.post("/register", (req, res) => {
   let registeredUser = findUserEmail(req.body.email);
   if (registeredUser !== null) {
     res.status(400);
-    res.send("User email already registered; please login, or register with another email address.");
-    return;
+    return res.send("User email already registered; please login, or register with another email address.");
   }
   if (req.body.email === "" || req.body.password === "") {
     res.status(400);
-    res.send("Email or Password field empty. Please enter a valid email or password.");
-    return;
+    return res.send("Email or Password field empty. Please enter a valid email or password.");
   }
   
   let userID = generateRandomString();
@@ -190,8 +188,7 @@ app.post("/login", (req, res) => {
   const registeredUser = findUserEmail(req.body.email);
   if (registeredUser === null) {
     res.status(403);
-    res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
-    return;
+    return res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
   }
 
   if (users[registeredUser].password !== req.body.password) {
