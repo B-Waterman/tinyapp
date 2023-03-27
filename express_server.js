@@ -78,7 +78,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userObject = req.cookies.user_id;
-  const templateVars = { user: userObject, urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, user: userObject };
   if (!userObject) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
@@ -86,20 +86,9 @@ app.get("/urls", (req, res) => {
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
-//Generates short URL & Saves to Database
-app.post("/urls", (req, res) => {
-  const id = generateRandomString();
-  const userObject = req.cookies.user_id;
-  if (!userObject) {
-    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
-  }
-  urlDatabase[id] = req.body.longURL;
-  res.redirect(`/urls/${id}`);
-});
-
 app.get("/urls/new", (req, res) => {
   const userObject = req.cookies.user_id;
-  const templateVars = { user: userObject, urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, user: userObject };
   if (!userObject) {
     return res.redirect("/login");
   }
@@ -117,7 +106,18 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const userObject = req.cookies.user_id;
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL, userObject);
+  res.redirect(longURL);
+});
+
+//Generates short URL & Saves to Database
+app.post("/urls", (req, res) => {
+  const id = generateRandomString();
+  const userObject = req.cookies.user_id;
+  if (!userObject) {
+    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
+  }
+  urlDatabase[id] = req.body.longURL;
+  res.redirect(`/urls/${id}`);
 });
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
