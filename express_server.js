@@ -31,8 +31,14 @@ const users = {
 //URL Database
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "aJ48lW",
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "aJ48lW",
+  },
 };
 
 app.get("/urls.json", (req, res) => {
@@ -51,7 +57,7 @@ function generateRandomString() {
 
 //Find registered user in users object via email
 //email as param, return entire object OR if no? 
-const findUserEmail = (email) => {
+function findUserEmail(email) {
   const values = Object.values(users);
   for (const user of values) {
     if (user.email === email) {
@@ -60,6 +66,10 @@ const findUserEmail = (email) => {
   }
 };
 
+//Users can only see/manipulate/access URLs created under their id
+function urlsForUser(id) {
+
+};
 
 // ROUTES
 
@@ -77,9 +87,9 @@ app.get("/", (req, res) => {
 //URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
-  const userObject = req.cookies.user_id;
-  const templateVars = { urls: urlDatabase, user: userObject };
-  if (!userObject) {
+  const userID = req.cookies.user_id;
+  const templateVars = { user: userID, urls: urlDatabase };
+  if (!userID) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   res.render("urls_index", templateVars);
@@ -87,9 +97,9 @@ app.get("/urls", (req, res) => {
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
-  const userObject = req.cookies.user_id;
-  const templateVars = { urls: urlDatabase, user: userObject };
-  if (!userObject) {
+  const userID = req.cookies.user_id;
+  const templateVars = { user: userID, urls: urlDatabase };
+  if (!userID) {
     return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
@@ -97,23 +107,25 @@ app.get("/urls/new", (req, res) => {
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
-  const userObject = req.cookies.user_id;
-  const templateVars = { user: userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const userID = req.cookies.user_id;
+  const id = req.params.id;
+  
+  const templateVars = { user: userID, id: req.params.id, longURL: urlDatabase[id].longUrl };
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[id].longUrl;
   res.redirect(longURL);
 });
 
 //Generates short URL & Saves to Database
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
-  const userObject = req.cookies.user_id;
-  if (!userObject) {
+  const userID = req.cookies.user_id;
+  if (!userID) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   urlDatabase[id] = req.body.longURL;
@@ -140,9 +152,9 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET: shows login page
 app.get("/login", (req, res) => {
-  const userObject = req.cookies.user_id;
-  const templateVars = { user: userObject };
-  if (!userObject) {
+  const userID = req.cookies.user_id;
+  const templateVars = { user: userID };
+  if (!userID) {
     return res.render("login", templateVars);
   }
   res.redirect("/urls");
@@ -172,9 +184,9 @@ app.post("/login", (req, res) => {
 
 //Shows registration page
 app.get("/register", (req, res) => {
-  const userObject = req.cookies.user_id;
-  const templateVars = { user: userObject };
-  if (!userObject) {
+  const userID = req.cookies.user_id;
+  const templateVars = { user: userID };
+  if (!userID) {
     return res.render("user_registration", templateVars);
   }
   res.redirect("/urls");
@@ -197,10 +209,10 @@ app.post("/register", (req, res) => {
     return res.send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
   
-  const userID = generateRandomString();
-  users[userID] = {userID, email, password};
+  const id = generateRandomString();
+  users[id] = {id, email, password};
   
-  res.cookie("user_id", userID);
+  res.cookie("user_id", id);
   res.redirect("/urls");
 });
 
