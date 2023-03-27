@@ -49,15 +49,15 @@ app.get("/urls.json", (req, res) => {
 //Helper Function
 
 //Generate Random ID for Tiny URLs & Users
-function generateRandomString() {
+const generateRandomString = function() {
   let alphaNumString = "";
   alphaNumString += Math.random().toString(36).substring(1, 8);
   return alphaNumString;
-}
+};
 
 //Find registered user in users object via email
 //email as param, return entire object OR if no? 
-function findUserEmail(email) {
+const findUserEmail = function(email) {
   const values = Object.values(users);
   for (const user of values) {
     if (user.email === email) {
@@ -67,7 +67,7 @@ function findUserEmail(email) {
 };
 
 //Users can only see/manipulate/access URLs created under their id
-function urlsForUser(id) {
+const urlsForUser = function(id) {
   const userURLS = {};
 
   const ids = Object.values(urlDatabase);
