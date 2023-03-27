@@ -52,12 +52,12 @@ function generateRandomString() {
 //Find registered user in users object via email
 //email as param, return entire object OR if no? return null
 const findUserEmail = (email) => {
-  for (let user in users) {
-    if (users[user].email === email) {
+  const values = Object.values(users);
+  for (const user of values) {
+    if (user.email === email) {
       return user;
     }
   }
-  return null;
 };
 
 
@@ -202,7 +202,7 @@ app.post("/register", (req, res) => {
 
 //LOGOUT
 
-//: removes user cookie and redirects to /login page
+//removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
