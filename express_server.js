@@ -76,8 +76,8 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let templateVars = { user: userObject };
-  if (userObject === undefined) {
-    res.render("login", templateVars);
+  if (!userObject) {
+    return res.render("login", templateVars);
   }
   res.redirect("/urls");
 });
@@ -87,8 +87,8 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let templateVars = { user: userObject };
-  if (userObject === undefined) {
-    res.render("user_registration", templateVars);
+  if (!userObject) {
+    return res.render("user_registration", templateVars);
   }
   res.redirect("/urls");
 });
@@ -109,8 +109,8 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let userObject = users[req.cookies.user_id];
   let templateVars = { user: userObject, urls: urlDatabase };
-  if (userObject === undefined) {
-    res.redirect("/login");
+  if (!userObject) {
+    return res.redirect("/login");
   }
   res.render("urls_new", templateVars);
 });
@@ -120,9 +120,8 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   let userObject = users[req.cookies.user_id];
-  if (userObject === undefined) {
-    window.alert("Hi there! Users must be logged in to create TinyUrls!")
-    res.redirect("/login")
+  if (!userObject) {
+    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   urlDatabase[id] = req.body.longURL;
   res.redirect(`/urls/${id}`);
