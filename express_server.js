@@ -19,12 +19,12 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "1234",
   },
   user2RandomID: {
     id: "userRandomID",
-    email: "user@example.com",
-    password: "Blah-the-Blah",
+    email: "user@example.ca",
+    password: "1234",
   }
 };
 
@@ -44,13 +44,13 @@ app.get("/urls.json", (req, res) => {
 
 //Generate Random ID for Tiny URLs & Users
 function generateRandomString() {
-  const alphaNumString = "";
+  let alphaNumString = "";
   alphaNumString += Math.random().toString(36).substring(1, 8);
   return alphaNumString;
 }
 
 //Find registered user in users object via email
-//email as param, return entire object OR if no? return null
+//email as param, return entire object OR if no? 
 const findUserEmail = (email) => {
   const values = Object.values(users);
   for (const user of values) {
@@ -152,9 +152,9 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
   const registeredUser = findUserEmail(email);
-  if (registeredUser === null) {
+  if (!registeredUser) {
     res.status(403);
-    return res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
+    return res.send("Hold on, you're not registered yet! Please return to the homepage and <a href = '/register'>register</a> by email.");
   }
 
   if (!registeredUser || registeredUser.password !== password) {
@@ -185,21 +185,20 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const registeredUser = findUserEmail(email);
-
+  
   if (!email || !password) {
     res.status(400);
     return res.send("Email or Password field empty. Please enter a valid email or password.");
   }
-  if (registeredUser) {
+  if (findUserEmail(email)) {
     res.status(400);
     return res.send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
   
   const userID = generateRandomString();
-  users[userID] = {id: userID, email, password};
+  users[userID] = {userID, email, password};
   
-  res.cookie("user_id", registeredUser.id);
+  res.cookie("user_id", userID);
   res.redirect("/urls");
 });
 
