@@ -148,17 +148,20 @@ app.get("/login", (req, res) => {
 
 //POST: creates user cookie and redirects to /urls as named user-session
 app.post("/login", (req, res) => {
-  const registeredUser = findUserEmail(req.body.email);
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const registeredUser = findUserEmail(email);
   if (registeredUser === null) {
     res.status(403);
     return res.send("Hold on, you're not registered yet! Please return to the homepage and register by email.");
   }
 
-  if (users[registeredUser].password !== req.body.password) {
+  if (!registeredUser || registeredUser.password !== password) {
     res.status(403);
-    return res.send("Incorrect password. Please re-try.");
+    return res.send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  res.cookie("user_id", registeredUser);
+  res.cookie("user_id", registeredUser.id);
   res.redirect("/urls");
   
 });
