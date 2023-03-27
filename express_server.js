@@ -33,7 +33,7 @@ const users = {
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "aJ48lW",
+    userID: "userRandomID",
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
@@ -67,7 +67,7 @@ const findUserEmail = function(email) {
 };
 
 //Users can only see/manipulate/access URLs created under their id
-const urlsForUser = function(id) {
+const urlsForUser = function(userID) {
   const urls = {};
 
   const ids = Object.keys(urlDatabase);
@@ -109,7 +109,9 @@ app.get("/urls", (req, res) => {
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies.user_id;
-  const templateVars = { user: userID, urls: urlDatabase };
+  const urls = urlsForUser(userID);
+  const templateVars = { user: userID, urls };
+
   if (!userID) {
     return res.redirect("/login");
   }
@@ -121,7 +123,11 @@ app.get("/urls/:id", (req, res) => {
   const userID = req.cookies.user_id;
   const id = req.params.id;
   
-  const templateVars = { user: userID, id: req.params.id, longURL: urlDatabase[id].longUrl };
+  if (!userID) {
+    return res.redirect("/login");
+  }
+
+  const templateVars = { user: userID, id: req.params.id, longURL: urlDatabase[id].longURL };
   res.render("urls_show", templateVars);
 });
 
@@ -137,7 +143,7 @@ app.get("/u/:id", (req, res) => {
 
   }
   const id = req.params.id;
-  const longURL = urlDatabase[id].longUrl;
+  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
 
