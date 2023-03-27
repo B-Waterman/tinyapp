@@ -68,15 +68,16 @@ const findUserEmail = function(email) {
 
 //Users can only see/manipulate/access URLs created under their id
 const urlsForUser = function(id) {
-  const userURLS = {};
+  const urls = {};
 
-  const ids = Object.values(urlDatabase);
+  const ids = Object.keys(urlDatabase);
   for (const id of ids) {
     const urlObject = urlDatabase[id];
     if (urlObject.userID === userID) {
       urls[id] = urlObject;
     }
   }
+  return urls;
 };
 
 // ROUTES
@@ -96,7 +97,9 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.cookies.user_id;
-  const templateVars = { user: userID, urls: urlDatabase };
+  const urls = urlsForUser(userID);
+  const templateVars = { user: userID, urls };
+
   if (!userID) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
@@ -124,6 +127,15 @@ app.get("/urls/:id", (req, res) => {
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
+  const userID = req.cookies.user_id;
+  const usersURLS = urlsForUser(userID);
+
+  if (!userID) {
+    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
+  }
+  if (!usersURLS) {
+
+  }
   const id = req.params.id;
   const longURL = urlDatabase[id].longUrl;
   res.redirect(longURL);
