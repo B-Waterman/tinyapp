@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8090; // default port 8080
 const bcrypt = require("bcryptjs");
 
 const cookieParser = require("cookie-parser");
@@ -16,18 +16,7 @@ app.set("view engine", "ejs");
 
 //User(s) Registration
 
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "1234",
-  },
-  user2RandomID: {
-    id: "userRandomID",
-    email: "user@example.ca",
-    password: "1234",
-  }
-};
+const users = {};
 
 //URL Database
 
@@ -194,16 +183,18 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+
   const registeredUser = findUserEmail(email);
-  if (!registeredUser) {
+  if (registeredUser === null) {
     res.status(403);
     return res.send("Hold on, you're not registered yet! Please return to the homepage and <a href = '/register'>register</a> by email.");
   }
 
-  if (!registeredUser || registeredUser.password !== password) {
+  if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     res.status(403);
     return res.send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
+  console.log(registeredUser.password);
   res.cookie("user_id", registeredUser.id);
   res.redirect("/urls");
   
@@ -238,10 +229,8 @@ app.post("/register", (req, res) => {
     res.status(400);
     return res.send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
-  
   const id = generateRandomString();
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  users[id] = {id, email, hashedPassword};
+  users[id] = { id, email, password: bcrypt.hashSync(password, 10) };
   
   res.cookie("user_id", id);
   res.redirect("/urls");
