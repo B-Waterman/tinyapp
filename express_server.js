@@ -33,11 +33,11 @@ const users = {
 const urlDatabase = {
   b2xVn2: {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "aJ48lW",
+    userID: "userRandomID",
   },
   i3BoGr: {
     longURL: "https://www.google.com",
-    userID: "aJ48lW",
+    userID: "userRandomID",
   },
 };
 
@@ -97,23 +97,25 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.cookies.user_id;
-  if (!userID) {
+  const user = users[userID];
+  if (!user) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   const urls = urlsForUser(userID);
 
-  const templateVars = { urls: urlDatabase, user: userID };
+  const templateVars = { urls, user };
   res.render("urls_index", templateVars);
 });
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
   const userID = req.cookies.user_id;
-  if (!userID) {
+  const user = users[userID];
+  if (!user) {
     return res.redirect("/login");
   }
 
-  const templateVars = { urls: urlDatabase, user: userID };
+  const templateVars = { urls, user };
   res.render("urls_new", templateVars);
 });
 
@@ -134,7 +136,8 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const userID = req.cookies.user_id;
-  if (!userID) {
+  const user = users[userID];
+  if (!user) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   urlDatabase[id] = { longURL: req.body.longURL, userID };
