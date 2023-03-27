@@ -31,8 +31,14 @@ const users = {
 //URL Database
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.com",
+    userID: "aJ48lW",
+  },
 };
 
 app.get("/urls.json", (req, res) => {
@@ -114,14 +120,13 @@ app.get("/urls/new", (req, res) => {
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
   const userID = req.cookies.user_id;
-  const templateVars = { user: userID, id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: userID };
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
@@ -132,7 +137,7 @@ app.post("/urls", (req, res) => {
   if (!userID) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
-  urlDatabase[id] = req.body.longURL;
+  urlDatabase[id] = { longURL: req.body.longURL, userID };
   res.redirect(`/urls/${id}`);
 });
 
