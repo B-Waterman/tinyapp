@@ -11,29 +11,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 
-//Helper Function
-
-//Generate Random ID for Tiny URLs & Users
-function generateRandomString() {
-  let alphaNumString = "";
-  alphaNumString += Math.random().toString(36).substring(1, 8);
-  return alphaNumString;
-}
-
-//Find registered user in users object via email
-//email as param, return entire object OR if no? return null
-const findUserEmail = (email) => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return user;
-    }
-  }
-  return null;
-};
-
 //DATABASES
 
-//SUGGESTED TEMPLATE User(s) Registration
+//User(s) Registration
 
 const users = {
   userRandomID: {
@@ -58,6 +38,28 @@ let urlDatabase = {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+
+//Helper Function
+
+//Generate Random ID for Tiny URLs & Users
+function generateRandomString() {
+  let alphaNumString = "";
+  alphaNumString += Math.random().toString(36).substring(1, 8);
+  return alphaNumString;
+}
+
+//Find registered user in users object via email
+//email as param, return entire object OR if no? return null
+const findUserEmail = (email) => {
+  for (let user in users) {
+    if (users[user].email === email) {
+      return user;
+    }
+  }
+  return null;
+};
+
 
 // ROUTES
 
@@ -130,7 +132,6 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
-
 
 
 //LOGIN
