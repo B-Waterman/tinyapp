@@ -30,7 +30,7 @@ const users = {
 
 //URL Database
 
-let urlDatabase = {
+const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -44,7 +44,7 @@ app.get("/urls.json", (req, res) => {
 
 //Generate Random ID for Tiny URLs & Users
 function generateRandomString() {
-  let alphaNumString = "";
+  const alphaNumString = "";
   alphaNumString += Math.random().toString(36).substring(1, 8);
   return alphaNumString;
 }
@@ -77,8 +77,8 @@ app.get("/", (req, res) => {
 //URLs - Saved to Session, Main Page
 
 app.get("/urls", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject, urls: urlDatabase };
+  const userObject = req.cookies.user_id;
+  const templateVars = { user: userObject, urls: urlDatabase };
   if (!userObject) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
@@ -89,7 +89,7 @@ app.get("/urls", (req, res) => {
 //Generates short URL & Saves to Database
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
-  let userObject = users[req.cookies.user_id];
+  const userObject = req.cookies.user_id;
   if (!userObject) {
     return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
@@ -98,8 +98,8 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject, urls: urlDatabase };
+  const userObject = req.cookies.user_id;
+  const templateVars = { user: userObject, urls: urlDatabase };
   if (!userObject) {
     return res.redirect("/login");
   }
@@ -108,15 +108,15 @@ app.get("/urls/new", (req, res) => {
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const userObject = req.cookies.user_id;
+  const templateVars = { user: userObject, id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let longURL = urlDatabase[req.params.id];
+  const userObject = req.cookies.user_id;
+  const longURL = urlDatabase[req.params.id];
   res.redirect(longURL, userObject);
 });
 
@@ -138,8 +138,8 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET: shows login page
 app.get("/login", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject };
+  const userObject = req.cookies.user_id;
+  const templateVars = { user: userObject };
   if (!userObject) {
     return res.render("login", templateVars);
   }
@@ -167,8 +167,8 @@ app.post("/login", (req, res) => {
 
 //Shows registration page
 app.get("/register", (req, res) => {
-  let userObject = users[req.cookies.user_id];
-  let templateVars = { user: userObject };
+  const userObject = req.cookies.user_id;
+  const templateVars = { user: userObject };
   if (!userObject) {
     return res.render("user_registration", templateVars);
   }
@@ -180,7 +180,7 @@ app.get("/register", (req, res) => {
 //check if email & password are empty strings = error 400
 //check if email already reg'd, = 400
 app.post("/register", (req, res) => {
-  let registeredUser = findUserEmail(req.body.email);
+  const registeredUser = findUserEmail(req.body.email);
   if (registeredUser !== null) {
     res.status(400);
     return res.send("User email already registered; please login, or register with another email address.");
@@ -190,7 +190,7 @@ app.post("/register", (req, res) => {
     return res.send("Email or Password field empty. Please enter a valid email or password.");
   }
   
-  let userID = generateRandomString();
+  const userID = generateRandomString();
   users[userID] = {
     id: userID,
     email: req.body.email,
