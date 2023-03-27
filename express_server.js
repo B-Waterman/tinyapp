@@ -146,6 +146,16 @@ app.post("/urls", (req, res) => {
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 app.post("/urls/:id", (req, res) => {
+  const userID = req.cookies.user_id;
+  const user = users[userID];
+  if (!user) {
+    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!")
+  }
+  const urls = urlsForUser(userID);
+  if (!urls) {
+    return res.send("Sorry, looks like these TinyUrls don't belong to your account!")
+  }
+  
   const id = req.params.id;
   urlDatabase[id].longURL = req.body.longURL;
   res.redirect("/urls");
@@ -153,8 +163,13 @@ app.post("/urls/:id", (req, res) => {
 
 //Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
+  const userID = req.cookies.user_id;
+  const user = users[userID];
+  if (!user) {
+    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!")
+  }
+
   const id = req.params.id;
-  
   delete urlDatabase[id];
   res.redirect("/urls");
 });
