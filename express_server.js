@@ -165,11 +165,11 @@ app.post("/urls/:id/delete", (req, res) => {
 //GET: shows login page
 app.get("/login", (req, res) => {
   const userID = req.cookies.user_id;
+  const templateVars = { user: userID };
   if (!userID) {
     return res.render("login", templateVars);
   }
 
-  const templateVars = { user: userID };
   res.redirect("/urls");
 });
 
@@ -198,11 +198,11 @@ app.post("/login", (req, res) => {
 //Shows registration page
 app.get("/register", (req, res) => {
   const userID = req.cookies.user_id;
+  const templateVars = { user: userID };
   if (!userID) {
     return res.render("user_registration", templateVars);
   }
   
-  const templateVars = { user: userID };
   res.redirect("/urls");
 });
 
