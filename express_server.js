@@ -7,15 +7,14 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 
 const bcrypt = require("bcryptjs");
 
 const cookieSession = require("cookie-session");
 app.use(cookieSession({
   name: 'session',
-  keys: ['key1'],
-  maxAge: 24 * 60 * 60 * 1000,
+  keys: ['aBeautifulPattern', 'key2']
 }));
 
 
@@ -27,31 +26,25 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "Blah-the-Blah",
+    password: bcrypt.hashSync("1234", 10)
   }
 };
 //URL Database
 
 const urlDatabase = {
-  b2xVn2: {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
   },
   i3BoGr: {
-    longURL: "https://www.google.com",
-    userID: "userRandomID",
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
   },
 };
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
 
 //Helper Function
 
@@ -109,7 +102,7 @@ app.get("/urls", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
-    return res.send("Hi there! I'm on line 99! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
+    return res.send("Hi there! I'm on line 99! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
   const urls = urlsForUser(userID);
   const templateVars = { user, urls };
@@ -151,7 +144,7 @@ app.post("/urls", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
   if (user === undefined) {
-    return res.send("Hi there! I'm on line 154! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
+    return res.send("Hi there! I'm on line 154! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
@@ -164,15 +157,15 @@ app.post("/urls/:id", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
-    return res.send("Hi there! I'm on line 167! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!")
+    return res.send("Hi there! I'm on line 167! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
   }
-  const urls = urlsForUser(userID);
+  const urls = urlsForUser(user);
   if (!urls) {
-    return res.send("Sorry, only the user who created this TinyUrl may edit its contents!") //add a return hyperlink to /urls here
+    return res.send("Sorry, only the user who created this TinyUrl may edit its contents!"); //add a return hyperlink to /urls here
   }
   
-  const shortURL = req.params.id;
-  urlDatabase[shortURL].longURL = req.body.longURL; //check this is working as intended with edits
+  const id = req.params.id;
+  urlDatabase[id].longURL = req.body.longURL; //check this is working as intended with edits
   res.redirect("/urls");
 });
 
@@ -213,7 +206,7 @@ app.post("/login", (req, res) => {
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  req.session[user_id] = userID;
+  req.session["userID"] = registeredUser;
   res.redirect("/urls");
   
 });
@@ -253,7 +246,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
   users[userID] = user;
-  req.session['user_id'] = userID;
+  req.session["user_id"] = userID;
   res.redirect("/urls");
 });
 
@@ -261,7 +254,7 @@ app.post("/register", (req, res) => {
 
 //removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
-  req.session.user_id = null;
+  req.session["user_id"] = null;
   res.redirect("/login");
 });
 
