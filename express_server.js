@@ -150,8 +150,8 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
-  if (!user) {
-    return res.send("Hi there! I'm on line 155! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
+  if (user === undefined) {
+    return res.send("Hi there! I'm on line 154! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
@@ -213,7 +213,7 @@ app.post("/login", (req, res) => {
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  req.session.user_id = userID;
+  req.session[user_id] = userID;
   res.redirect("/urls");
   
 });
