@@ -211,10 +211,9 @@ app.post("/login", (req, res) => {
   const registeredUser = findUserEmail(email);
   
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
-    res.status(403);
-    return res.send("Invalid login. Please <a href = '/login'>retry</a>.");
+    return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  req.session.user_id = registeredUser.id;
+  req.session.user_id = userID;
   res.redirect("/urls");
   
 });
@@ -262,7 +261,7 @@ app.post("/register", (req, res) => {
 
 //removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
-  req.session = null;
+  req.session.user_id = null;
   res.redirect("/login");
 });
 
