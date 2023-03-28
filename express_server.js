@@ -11,12 +11,12 @@ const cookieParser = require("cookie-parser");
 
 const bcrypt = require("bcryptjs");
 
-// const cookieSession = require("cookie-session");
-// app.use(cookieSession({
-//   name: 'session',
-//   keys: ['key1'],
-//   maxAge: 24 * 60 * 60 * 1000,
-// }));
+const cookieSession = require("cookie-session");
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1'],
+  maxAge: 24 * 60 * 60 * 1000,
+}));
 
 
 //DATABASES
@@ -105,14 +105,14 @@ app.get("/", (req, res) => {
 
 
 //URLs - Saved to Session, Main Page
-
 app.get("/urls", (req, res) => {
   let userID = req.session.user_id;
-  if (!userID) {
+  const user = users[userID];
+  if (!user) {
     return res.send("Hi there! I'm on line 99! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
   const urls = urlsForUser(userID);
-  const templateVars = { user: userID, urls };
+  const templateVars = { user, urls };
 
   res.render("urls_index", templateVars);
 });
@@ -120,65 +120,73 @@ app.get("/urls", (req, res) => {
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
   let userID = req.session.user_id;
-  if (!userID) {
+  const user = users[userID];
+  if (!user) {
     return res.redirect("/login");
   }
   const urls = urlsForUser(userID);
-  const templateVars = { urls, user: userID };
+  const templateVars = { user, urls };
   res.render("urls_new", templateVars);
 });
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
   let userID = req.session.user_id;
-  
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, user: userID };
+  const user = users[userID];
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL].longURL;
+  const templateVars = { id: shortURL, longURL, user };
+
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id].longURL;
-  res.redirect(longURL);
+  res.redirect(longURL); //Does this need userID too? test
 });
 
 //Generates short URL & Saves to Database
 app.post("/urls", (req, res) => {
-  const id = generateRandomString();
   let userID = req.session.user_id;
-  if (!userID) {
-    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
+  const user = users[userID];
+  if (!user) {
+    return res.send("Hi there! I'm on line 155! Users must be <a href = '/login'>logged in</a> to create TinyUrls!")
   }
-  urlDatabase[id] = { longURL: req.body.longURL, userID };
-  res.redirect(`/urls/${id}`);
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = { longURL, user }; //saves key-value pair to urlDatabase
+  res.redirect(`/urls/${shortURL}`);
 });
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 app.post("/urls/:id", (req, res) => {
   let userID = req.session.user_id;
-  if (!userID) {
-    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!")
+  const user = users[userID];
+  if (!user) {
+    return res.send("Hi there! I'm on line 167! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!")
   }
   const urls = urlsForUser(userID);
   if (!urls) {
-    return res.send("Sorry, looks like these TinyUrls don't belong to your account!")
+    return res.send("Sorry, only the user who created this TinyUrl may edit its contents!") //add a return hyperlink to /urls here
   }
   
-  const id = req.params.id;
-  urlDatabase[id].longURL = req.body.longURL;
+  const shortURL = req.params.id;
+  urlDatabase[shortURL].longURL = req.body.longURL; //check this is working as intended with edits
   res.redirect("/urls");
 });
 
 //Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
   let userID = req.session.user_id;
-  if (!userID) {
-    return res.send("Hi there! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!")
+  const user = users[userID];
+  const urls = urlsForUser(userID);
+  if (user && urls) {
+    const shortURL = req.params.id;
+    delete urlDatabase[shortURL];
+    res.redirect("/urls");
   }
-
-  const id = req.params.id;
-  delete urlDatabase[id];
-  res.redirect("/urls");
+  res.send("Hi there! I'm on line 187! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
 });
 
 
@@ -187,7 +195,8 @@ app.post("/urls/:id/delete", (req, res) => {
 //GET: shows login page
 app.get("/login", (req, res) => {
   let userID = req.session.user_id;
-  if (userID) {
+  const user = users[userID];
+  if (user) {
     return res.redirect("/urls");
   }
   
@@ -215,8 +224,9 @@ app.post("/login", (req, res) => {
 //Shows registration page
 app.get("/register", (req, res) => {
   let userID = req.session.user_id;
-  const templateVars = { user: userID };
-  if (!userID) {
+  const user = users[userID];
+  const templateVars = { user };
+  if (!user) {
     return res.render("user_registration", templateVars);
   }
   
@@ -230,18 +240,20 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  let userID = generateRandomString();
+  const user = {
+    id: userID,
+    email,
+    password: bcrypt.hashSync(password, 10)
+  };
   
-  if (!email || !password) {
-    res.status(400);
-    return res.send("Email or Password field empty. Please enter a valid email or password.");
+  if (!user.email || !user.password) {
+    return res.status(400).send("Email or Password field empty. Please enter a valid email or password.");
   }
   if (findUserEmail(email)) {
-    res.status(400);
-    return res.send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
+    return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
-  let userID = generateRandomString();
-  users[userID] = { userID, email, password: bcrypt.hashSync(password, 10) };
-  
+  users[userID] = user;
   req.session['user_id'] = userID;
   res.redirect("/urls");
 });
