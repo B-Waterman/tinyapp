@@ -7,16 +7,15 @@ const generateRandomString = function() {
 
 //Find registered user in users object via email
 const getUserByEmail = function(email, users) {
-  const values = Object.values(users);
-  for (const user of values) {
-    if (user.email === email) {
-      return user;
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user];
     }
-  }
+  } return false;
 };
 
 //Users can only see/manipulate/access URLs created under their id
-const urlsForUser = function(userID) {
+const urlsForUser = function(userID, urlDatabase) {
   const urls = {};
   const ids = Object.keys(urlDatabase);
   

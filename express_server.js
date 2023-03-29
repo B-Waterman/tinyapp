@@ -70,11 +70,12 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   console.log("userID", userID);
+  console.log("Total users object", users);
   const user = users[userID];
   if (!user) {
     return res.send("Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
-  const urls = urlsForUser(userID);
+  const urls = urlsForUser(userID, urlDatabase);
   const templateVars = { user, urls };
 
   res.render("urls_index", templateVars);
@@ -87,7 +88,7 @@ app.get("/urls/new", (req, res) => {
   if (!user) {
     return res.redirect("/login");
   }
-  const urls = urlsForUser(user);
+  const urls = urlsForUser(user, urlDatabase);
   const templateVars = { user, urls };
   res.render("urls_new", templateVars);
 });
@@ -107,7 +108,7 @@ app.get("/urls/:id", (req, res) => {
   }
   
   const templateVars = { id, longURL, user };
-  console.log("templateVars 144", templateVars);
+  console.log("templateVars", templateVars);
 
   res.render("urls_show", templateVars);
 });
@@ -141,7 +142,7 @@ app.post("/urls/:id", (req, res) => {
   if (!user) {
     return res.send("Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
   }
-  const urls = urlsForUser(user);
+  const urls = urlsForUser(user, urlDatabase);
   if (!urls) {
     return res.send("Sorry, only the user who created this TinyUrl may edit its contents!"); //add a return hyperlink to /urls here
   }
@@ -156,7 +157,7 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
-  const urls = urlsForUser(user);
+  const urls = urlsForUser(user, urlDatabase);
   if (user && urls) {
     const id = req.params.id;
     delete urlDatabase[id];
@@ -184,14 +185,12 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const registeredUser = getUserByEmail(email);
+  const registeredUser = getUserByEmail(email, users);
   
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  console.log("registeredUser", registeredUser);
   req.session.user_id = registeredUser.id;
-  // req.session('user_id', registeredUser.id); //DOUBLE CHECK COOKIE SESSION SYNTAX HERE
   res.redirect("/urls");
   
 });
@@ -224,9 +223,10 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     return res.status(400).send("Email or Password field empty. Please enter a valid email or password.");
   }
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
+  console.log("req.session post register", req.session.user_id);
   req.session.user_id = id;
   res.redirect("/urls");
 });
