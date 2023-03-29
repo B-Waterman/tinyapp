@@ -1,22 +1,22 @@
-const express = require("express");
+const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 
-app.set("view engine", "ejs");
+app.set('view engine', 'ejs');
 
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+// const cookieParser = require("cookie-parser");
+// app.use(cookieParser());
 
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 
-// const cookieSession = require("cookie-session");
-// app.use(cookieSession({
-//   name: 'session',
-//   keys: ['aBeautifulPattern', 'key2']
-// }));
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}));
 
 
 //DATABASES
@@ -139,7 +139,7 @@ app.get("/urls/:id", (req, res) => {
   if (urlDatabase[id].userID !== user.id) {
     return res.status(401).send("Sorry, only the user who created this TinyUrl may edit its contents! Please <a href = '/login'>log in</a> to continue.")
   }
-
+  
   const templateVars = { id, longURL, user };
   console.log("templateVars 144", templateVars);
 
@@ -182,7 +182,7 @@ app.post("/urls/:id", (req, res) => {
   
   const id = req.params.id;
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL; //check this is working as intended with edits
+  urlDatabase[id].longURL = longURL; //check this is working as intended with edits
   res.redirect("/urls");
 });
 
@@ -191,9 +191,10 @@ app.post("/urls/:id/delete", (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
   const urls = urlsForUser(user);
-  if (urlDatabase[id].userID === user.id) {
-    delete urlDatabase[req.params.id];
-    res.redirect("/urls");
+  if (user && urls) {
+    const id = req.params.id;
+    delete urlDatabase[id];
+    return res.redirect("/urls");
   }
   res.send("Error: line 195! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
 });
