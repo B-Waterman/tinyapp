@@ -24,7 +24,7 @@ app.use(cookieSession({
 
 const users = {
   userRandomID: {
-    id: "userRandomID",
+    id: "aJ48lW",
     email: "user@example.com",
     password: bcrypt.hashSync("1234", 10)
   }
@@ -68,8 +68,8 @@ const findUserEmail = function(email) {
 //Users can only see/manipulate/access URLs created under their id
 const urlsForUser = function(userID) {
   const urls = {};
-
   const ids = Object.keys(urlDatabase);
+  
   for (const id of ids) {
     const urlObject = urlDatabase[id];
     if (urlObject.userID === userID) {
@@ -90,7 +90,8 @@ app.get("/hello", (req, res) => {
 //Redirects to main page
 app.get("/", (req, res) => {
   let userID = req.session.user_id;
-  if (userID) {
+  const user = users[userID];
+  if (user) {
     return res.redirect("/urls");
   }
   res.redirect('/login');
@@ -102,9 +103,9 @@ app.get("/urls", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
-    return res.send("Hi there! I'm on line 99! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
+    return res.send("Hi there! I'm on line 106! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
-  const urls = urlsForUser(userID);
+  const urls = urlsForUser(user);
   const templateVars = { user, urls };
 
   res.render("urls_index", templateVars);
@@ -117,7 +118,7 @@ app.get("/urls/new", (req, res) => {
   if (!user) {
     return res.redirect("/login");
   }
-  const urls = urlsForUser(userID);
+  const urls = urlsForUser(user);
   const templateVars = { user, urls };
   res.render("urls_new", templateVars);
 });
@@ -144,7 +145,7 @@ app.post("/urls", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
   if (user === undefined) {
-    return res.send("Hi there! I'm on line 154! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
+    return res.send("Hi there! I'm on line 148! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
@@ -157,7 +158,7 @@ app.post("/urls/:id", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
-    return res.send("Hi there! I'm on line 167! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
+    return res.send("Hi there! I'm on line 161! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
   }
   const urls = urlsForUser(user);
   if (!urls) {
@@ -173,13 +174,13 @@ app.post("/urls/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   let userID = req.session.user_id;
   const user = users[userID];
-  const urls = urlsForUser(userID);
+  const urls = urlsForUser(user);
   if (user && urls) {
     const shortURL = req.params.id;
     delete urlDatabase[shortURL];
     res.redirect("/urls");
   }
-  res.send("Hi there! I'm on line 187! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
+  res.send("Hi there! I'm on line 183! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
 });
 
 
@@ -193,7 +194,7 @@ app.get("/login", (req, res) => {
     return res.redirect("/urls");
   }
   
-  const templateVars = { user: users[userID] };
+  const templateVars = { user };
   res.render("login", templateVars);
 });
 
@@ -206,7 +207,7 @@ app.post("/login", (req, res) => {
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  req.session["userID"] = registeredUser;
+  req.session.user_id = registeredUser;
   res.redirect("/urls");
   
 });
@@ -232,21 +233,20 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  let userID = generateRandomString();
-  const user = {
-    id: userID,
+  const id = generateRandomString();
+  users[id] = {
+    id,
     email,
     password: bcrypt.hashSync(password, 10)
   };
   
-  if (!user.email || !user.password) {
+  if (!email || !password) {
     return res.status(400).send("Email or Password field empty. Please enter a valid email or password.");
   }
   if (findUserEmail(email)) {
     return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
-  users[userID] = user;
-  req.session["user_id"] = userID;
+  req.session.user_id = id;
   res.redirect("/urls");
 });
 
