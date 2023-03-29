@@ -57,7 +57,7 @@ const generateRandomString = function() {
 };
 
 //Find registered user in users object via email
-const findUserEmail = function(email) {
+const getUserByEmail = function(email, users) {
   const values = Object.values(users);
   for (const user of values) {
     if (user.email === email) {
@@ -218,7 +218,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const registeredUser = findUserEmail(email);
+  const registeredUser = getUserByEmail(email);
   
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
@@ -261,7 +261,7 @@ app.post("/register", (req, res) => {
   if (!email || !password) {
     return res.status(400).send("Email or Password field empty. Please enter a valid email or password.");
   }
-  if (findUserEmail(email)) {
+  if (getUserByEmail(email)) {
     return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
   req.session.user_id = id;
