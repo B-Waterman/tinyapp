@@ -1,21 +1,22 @@
 const express = require("express");
 const app = express();
-const PORT = 8090; // default port 8080
+const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// const cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
 const bcrypt = require("bcryptjs");
 
-const cookieSession = require("cookie-session");
-app.use(cookieSession({
-  name: 'session',
-  keys: ['aBeautifulPattern', 'key2']
-}));
+// const cookieSession = require("cookie-session");
+// app.use(cookieSession({
+//   name: 'session',
+//   keys: ['aBeautifulPattern', 'key2']
+// }));
 
 
 //DATABASES
@@ -71,7 +72,8 @@ const urlsForUser = function(userID) {
   const ids = Object.keys(urlDatabase);
   
   for (const id of ids) {
-    const urlObject = urlDatabase[id];
+    const urlObject = urlDatabase[id]
+    console.log("urlsForUser", urlObject, userID);
     if (urlObject.userID === userID) {
       urls[id] = urlObject;
     }
@@ -89,7 +91,7 @@ app.get("/hello", (req, res) => {
 
 //Redirects to main page
 app.get("/", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies.user_id;
   const user = users[userID];
   if (user) {
     return res.redirect("/urls");
@@ -100,10 +102,11 @@ app.get("/", (req, res) => {
 
 //URLs - Saved to Session, Main Page
 app.get("/urls", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies.user_id;
+  console.log("userID", userID);
   const user = users[userID];
   if (!user) {
-    return res.send("Hi there! I'm on line 106! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
+    return res.send("Error: line 108! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
   const urls = urlsForUser(userID);
   const templateVars = { user, urls };
@@ -113,7 +116,7 @@ app.get("/urls", (req, res) => {
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
-  const id = req.session["user_id"];
+  const id = req.cookies["user_id"];
   const user = users[id];
   if (!user) {
     return res.redirect("/login");
@@ -125,40 +128,52 @@ app.get("/urls/new", (req, res) => {
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies["user_id"];
   const user = users[userID];
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].longURL;
-  const templateVars = { id: shortURL, longURL, user };
+  if (!userID || !user) {
+    return res.status(401).send("Error: line 133! Users must be <a href = '/login'>logged in</a> to continue.")
+  }
+  const id = req.params.id;
+  const longURL = urlDatabase[id].longURL;
+  console.log("New url Added", longURL);
+  if (urlDatabase[id].userID !== user.id) {
+    return res.status(401).send("Sorry, only the user who created this TinyUrl may edit its contents! Please <a href = '/login'>log in</a> to continue.")
+  }
+
+  const templateVars = { id, longURL, user };
+  console.log("templateVars 144", templateVars);
 
   res.render("urls_show", templateVars);
 });
 
 //Redirects to corresponding long URL from database
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id].longURL;
+  const id = req.params.id;
+  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL); //Does this need userID too? test
 });
 
 //Generates short URL & Saves to Database
 app.post("/urls", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies["user_id"];
   const user = users[userID];
-  if (user === undefined) {
-    return res.send("Hi there! I'm on line 148! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
+  if (!user) {
+    return res.send("Error: line 158! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
-  const shortURL = generateRandomString();
+  const id = generateRandomString();
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = { longURL, user }; //saves key-value pair to urlDatabase
-  res.redirect(`/urls/${shortURL}`);
+  urlDatabase[id] = { longURL, userID }; //saves key-value pair to urlDatabase
+  res.redirect(`/urls/${id}`);
+
+  console.log("New URL Added:", urlDatabase)
 });
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 app.post("/urls/:id", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies["user_id"];
   const user = users[userID];
   if (!user) {
-    return res.send("Hi there! I'm on line 161! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
+    return res.send("Error: line 173! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
   }
   const urls = urlsForUser(user);
   if (!urls) {
@@ -166,21 +181,21 @@ app.post("/urls/:id", (req, res) => {
   }
   
   const id = req.params.id;
-  urlDatabase[id].longURL = req.body.longURL; //check this is working as intended with edits
+  const longURL = req.body.longURL;
+  urlDatabase[id] = longURL; //check this is working as intended with edits
   res.redirect("/urls");
 });
 
 //Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
-  const userID = req.session["user_id"];
+  const userID = req.cookies["user_id"];
   const user = users[userID];
   const urls = urlsForUser(user);
-  if (user && urls) {
-    const shortURL = req.params.id;
-    delete urlDatabase[shortURL];
+  if (urlDatabase[id].userID === user.id) {
+    delete urlDatabase[req.params.id];
     res.redirect("/urls");
   }
-  res.send("Hi there! I'm on line 183! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
+  res.send("Error: line 195! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
 });
 
 
@@ -188,7 +203,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET: shows login page
 app.get("/login", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies.user_id;
   const user = users[userID];
   if (user) {
     return res.redirect("/urls");
@@ -207,7 +222,9 @@ app.post("/login", (req, res) => {
   if (!registeredUser || !bcrypt.compareSync(password, registeredUser.password)) {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
-  req.session.user_id = registeredUser;
+  console.log("registeredUser", registeredUser);
+  // req.cookies.user_id = registeredUser.id;
+  res.cookie('user_id', registeredUser.id);
   res.redirect("/urls");
   
 });
@@ -216,7 +233,7 @@ app.post("/login", (req, res) => {
 
 //Shows registration page
 app.get("/register", (req, res) => {
-  const userID = req.session.user_id;
+  const userID = req.cookies.user_id;
   const user = users[userID];
   const templateVars = { user };
   if (!user) {
@@ -246,7 +263,7 @@ app.post("/register", (req, res) => {
   if (findUserEmail(email)) {
     return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
-  req.session.user_id = id;
+  req.cookies.user_id = id;
   res.redirect("/urls");
 });
 
@@ -254,7 +271,7 @@ app.post("/register", (req, res) => {
 
 //removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
-  req.session["user_id"] = null;
+  req.cookies["user_id"] = null;
   res.redirect("/login");
 });
 
