@@ -91,7 +91,7 @@ app.get("/hello", (req, res) => {
 
 //Redirects to main page
 app.get("/", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (user) {
     return res.redirect("/urls");
@@ -102,7 +102,7 @@ app.get("/", (req, res) => {
 
 //URLs - Saved to Session, Main Page
 app.get("/urls", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   console.log("userID", userID);
   const user = users[userID];
   if (!user) {
@@ -116,7 +116,7 @@ app.get("/urls", (req, res) => {
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session["user_id"];
   const user = users[id];
   if (!user) {
     return res.redirect("/login");
@@ -128,7 +128,7 @@ app.get("/urls/new", (req, res) => {
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   if (!userID || !user) {
     return res.status(401).send("Error: line 133! Users must be <a href = '/login'>logged in</a> to continue.")
@@ -150,12 +150,12 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
-  res.redirect(longURL); //Does this need userID too? test
+  res.redirect(longURL);
 });
 
 //Generates short URL & Saves to Database
 app.post("/urls", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   if (!user) {
     return res.send("Error: line 158! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
@@ -170,7 +170,7 @@ app.post("/urls", (req, res) => {
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 app.post("/urls/:id", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   if (!user) {
     return res.send("Error: line 173! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
@@ -188,7 +188,7 @@ app.post("/urls/:id", (req, res) => {
 
 //Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const urls = urlsForUser(user);
   if (user && urls) {
@@ -204,7 +204,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET: shows login page
 app.get("/login", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (user) {
     return res.redirect("/urls");
@@ -224,8 +224,8 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid login. Please <a href = '/login'>retry</a>.");
   }
   console.log("registeredUser", registeredUser);
-  // req.cookies.user_id = registeredUser.id;
-  res.cookie('user_id', registeredUser.id);
+  req.session.user_id = registeredUser.id;
+  // req.session('user_id', registeredUser.id); //DOUBLE CHECK COOKIE SESSION SYNTAX HERE
   res.redirect("/urls");
   
 });
@@ -234,7 +234,7 @@ app.post("/login", (req, res) => {
 
 //Shows registration page
 app.get("/register", (req, res) => {
-  const userID = req.cookies.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = { user };
   if (!user) {
@@ -264,7 +264,7 @@ app.post("/register", (req, res) => {
   if (findUserEmail(email)) {
     return res.status(400).send("This email is already registered; please <a href = '/login'>login</a>, or <a href = '/register'>register</a> with another email address.");
   }
-  req.cookies.user_id = id;
+  req.session.user_id = id;
   res.redirect("/urls");
 });
 
@@ -272,7 +272,7 @@ app.post("/register", (req, res) => {
 
 //removes user cookie and redirects to /login page
 app.post("/logout", (req, res) => {
-  req.cookies["user_id"] = null;
+  req.session["user_id"] = null;
   res.redirect("/login");
 });
 
