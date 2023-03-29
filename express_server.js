@@ -24,7 +24,7 @@ app.use(cookieSession({
 
 const users = {
   userRandomID: {
-    id: "aJ48lW",
+    id: "userRandomID",
     email: "user@example.com",
     password: bcrypt.hashSync("1234", 10)
   }
@@ -34,7 +34,7 @@ const users = {
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
+    userID: "userRandomID",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
@@ -89,7 +89,7 @@ app.get("/hello", (req, res) => {
 
 //Redirects to main page
 app.get("/", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (user) {
     return res.redirect("/urls");
@@ -100,12 +100,12 @@ app.get("/", (req, res) => {
 
 //URLs - Saved to Session, Main Page
 app.get("/urls", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
     return res.send("Hi there! I'm on line 106! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
-  const urls = urlsForUser(user);
+  const urls = urlsForUser(userID);
   const templateVars = { user, urls };
 
   res.render("urls_index", templateVars);
@@ -113,8 +113,8 @@ app.get("/urls", (req, res) => {
 
 //Create a New Tiny Url - MUST STAY ABOVE /URLS/:ID Definitions
 app.get("/urls/new", (req, res) => {
-  let userID = req.session.user_id;
-  const user = users[userID];
+  const id = req.session["user_id"];
+  const user = users[id];
   if (!user) {
     return res.redirect("/login");
   }
@@ -125,7 +125,7 @@ app.get("/urls/new", (req, res) => {
 
 //New Page/ URL Show
 app.get("/urls/:id", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL].longURL;
@@ -142,7 +142,7 @@ app.get("/u/:id", (req, res) => {
 
 //Generates short URL & Saves to Database
 app.post("/urls", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (user === undefined) {
     return res.send("Hi there! I'm on line 148! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
@@ -155,7 +155,7 @@ app.post("/urls", (req, res) => {
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
 app.post("/urls/:id", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
     return res.send("Hi there! I'm on line 161! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
@@ -172,7 +172,7 @@ app.post("/urls/:id", (req, res) => {
 
 //Delete Saved URLs from Server
 app.post("/urls/:id/delete", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session["user_id"];
   const user = users[userID];
   const urls = urlsForUser(user);
   if (user && urls) {
@@ -188,7 +188,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //GET: shows login page
 app.get("/login", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   if (user) {
     return res.redirect("/urls");
@@ -216,7 +216,7 @@ app.post("/login", (req, res) => {
 
 //Shows registration page
 app.get("/register", (req, res) => {
-  let userID = req.session.user_id;
+  const userID = req.session.user_id;
   const user = users[userID];
   const templateVars = { user };
   if (!user) {
