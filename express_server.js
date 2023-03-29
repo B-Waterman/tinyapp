@@ -18,6 +18,7 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
+const { generateRandomString, getUserByEmail, urlsForUser } = require('./helpers');
 
 //DATABASES
 
@@ -47,41 +48,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//Helper Function
-
-//Generate Random ID for Tiny URLs & Users
-const generateRandomString = function() {
-  let alphaNumString = "";
-  alphaNumString += Math.random().toString(36).substring(1, 8);
-  return alphaNumString;
-};
-
-//Find registered user in users object via email
-const getUserByEmail = function(email, users) {
-  const values = Object.values(users);
-  for (const user of values) {
-    if (user.email === email) {
-      return user;
-    }
-  }
-};
-
-//Users can only see/manipulate/access URLs created under their id
-const urlsForUser = function(userID) {
-  const urls = {};
-  const ids = Object.keys(urlDatabase);
-  
-  for (const id of ids) {
-    const urlObject = urlDatabase[id]
-    console.log("urlsForUser", urlObject, userID);
-    if (urlObject.userID === userID) {
-      urls[id] = urlObject;
-    }
-  }
-  return urls;
-};
-
-
 //GET/POST ROUTES
 
 //Tester
@@ -106,7 +72,7 @@ app.get("/urls", (req, res) => {
   console.log("userID", userID);
   const user = users[userID];
   if (!user) {
-    return res.send("Error: line 108! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
+    return res.send("Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
   const urls = urlsForUser(userID);
   const templateVars = { user, urls };
@@ -131,13 +97,13 @@ app.get("/urls/:id", (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
   if (!userID || !user) {
-    return res.status(401).send("Error: line 133! Users must be <a href = '/login'>logged in</a> to continue.")
+    return res.status(401).send("Users must be <a href = '/login'>logged in</a> to continue.");
   }
   const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
   console.log("New url Added", longURL);
   if (urlDatabase[id].userID !== user.id) {
-    return res.status(401).send("Sorry, only the user who created this TinyUrl may edit its contents! Please <a href = '/login'>log in</a> to continue.")
+    return res.status(401).send("Sorry, only the user who created this TinyUrl may edit its contents! Please <a href = '/login'>log in</a> to continue.");
   }
   
   const templateVars = { id, longURL, user };
@@ -158,14 +124,14 @@ app.post("/urls", (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
   if (!user) {
-    return res.send("Error: line 158! Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
+    return res.send("Users must be <a href = '/login'>logged in</a> to create TinyUrls!");
   }
   const id = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[id] = { longURL, userID }; //saves key-value pair to urlDatabase
   res.redirect(`/urls/${id}`);
 
-  console.log("New URL Added:", urlDatabase)
+  console.log("New URL Added:", urlDatabase);
 });
 
 //Redirects client to /urls once Tiny URL is edited and saved to database
@@ -173,7 +139,7 @@ app.post("/urls/:id", (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
   if (!user) {
-    return res.send("Error: line 173! Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
+    return res.send("Users must be <a href = '/login'>logged in</a> to delete TinyUrls!");
   }
   const urls = urlsForUser(user);
   if (!urls) {
@@ -196,7 +162,7 @@ app.post("/urls/:id/delete", (req, res) => {
     delete urlDatabase[id];
     return res.redirect("/urls");
   }
-  res.send("Error: line 195! Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
+  res.send("Only authorized users may delete TinyUrls! Please <a href = '/login'>log in</a> to continue!");
 });
 
 
@@ -245,9 +211,6 @@ app.get("/register", (req, res) => {
 });
 
 //Register new user to Users database
-
-//check if email & password are empty strings = error 400
-//check if email already reg'd, = 400
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
